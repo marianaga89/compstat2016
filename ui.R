@@ -10,7 +10,6 @@
 library(shiny)
 library(markdown)
 library(markdown)
-
 navbarPage("Tareas",
            tabPanel("Tarea_1",
                     titlePanel("Función Inversa"),
@@ -18,11 +17,13 @@ navbarPage("Tareas",
                       sidebarPanel(
                         numericInput("num1","Número de simulaciones",1000),
                         numericInput("num2","Lambda",.2),
-                        actionButton("go", "Histograma"),
+                        actionButton("go", "Generar"),
+                        numericInput("num3","Número de cajones del histograma",50),
                         radioButtons("bonaj", label = h3("Bondad de Ajuste"),
-                                     choices = list("Ji-Cuadrada" = 1, "Kolmogorov-Smirnov" = 2), 
+                                     choices = list("Ji-Cuadrada" = 1, "Kolmogorov-Smirnov" = 2, "Gráfica" = 3), 
                                      selected = 1),
-                        actionButton("bo", "Bondad de Ajuste")
+                        actionButton("bo", "Bondad de Ajuste"),
+                        downloadButton('downloadData', 'Descarga de muestra')
                       ),
                       mainPanel(
                         plotOutput("hist"),
@@ -38,7 +39,9 @@ navbarPage("Tareas",
                         textInput("expresion1","Función a integrar","function(x) 2*x"),
                         numericInput("a","Límite inferior de la integral",0),
                         numericInput("b","Límite superior de la integral",1),
-                        numericInput("alpha","Nivel de confianza de los intervalos",.5),
+                        actionButton("go2", "Generar"),
+                        numericInput("alpha1","Nivel de confianza de los intervalos",.5),
+                        numericInput("alpha2","Nivel de confianza de los intervalos",.5),
                         verbatimTextOutput("Result")
                       ),
                       mainPanel(
@@ -46,5 +49,27 @@ navbarPage("Tareas",
                         plotOutput("grafint")
                       )
                     )
-           )
+           ),
+           tabPanel("Tarea_3",
+                       titlePanel("Cadenas de Markov"),
+                       sidebarLayout(
+                         sidebarPanel(
+                           fileInput('file1', 'Matriz de Transición',
+                                     accept = c(
+                                       'text/csv',
+                                       'text/comma-separated-values',
+                                       'text/tab-separated-values',
+                                       'text/plain',
+                                       '.csv',
+                                       '.tsv',
+                                       '.dat',
+                                       'xlsx'
+                                     )
+                         )
+                       ),
+                       mainPanel(
+                         tableOutput('contents')
+                       )
+                       )
+)
 )
