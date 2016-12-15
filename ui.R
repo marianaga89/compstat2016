@@ -43,10 +43,12 @@ navbarPage("Tareas",
                         actionButton("go2", "Generar")
                       ),
                       mainPanel(
-                        plotOutput("graf"),
-                        plotOutput("grafint"),
-                        plotOutput("grafcomp"),
-                        verbatimTextOutput("Result")
+                        tabsetPanel(
+                          tabPanel("Gráfica función a integrar", plotOutput("graf")), 
+                          tabPanel("Gráfica estimación con intervalos de confianza", plotOutput("grafint")), 
+                          tabPanel("Gráficas comparativa de modelos", plotOutput("grafcomp")),
+                          tabPanel("Tabla de estimaciones y limites",verbatimTextOutput("Result"))
+                        )
                       )
                     )
            ),
@@ -59,12 +61,20 @@ navbarPage("Tareas",
                                          "Talla" = "2")),
                            selectInput("variabley", "Variable dependiente Y:",
                                        c("Talla" = "2",
-                                         "Peso" = "1"))
-                       ),
+                                         "Peso" = "1")),
+                           fluidRow(
+                           numericInput("med_a",label="Media parámetro a",0),
+                           numericInput("sd_a",label = "Desviacion parámetro a",0),
+                           numericInput("med_b",label="Media parámetro b",0),
+                           numericInput("sd_b",label = "Desviacion parámetro b",0),
+                           numericInput("min_sd",label="Valor mínomo parámetro s",0),
+                           numericInput("max_sd",label = "Valor máximo parámetro s",0)
+                       )),
                        mainPanel(
-                         fluidRow(
-                           DT::dataTableOutput("table"),
-                           plotOutput("graft4")
+                         tabsetPanel(
+                           tabPanel("Datos", DT::dataTableOutput("table")), 
+                           tabPanel("Sactter Plot", plotOutput("graft4")), 
+                           tabPanel("Gráficas densidades", plotOutput("graf_dens"))
                          )
                        )
                        )
@@ -74,10 +84,9 @@ tabPanel("Tarea_5",
          sidebarLayout(
            sidebarPanel(
              sliderInput("slider1", label = h4("Número de cadenas que se quiere simular"),
-                         min = 0, max = 100, value = 50),
+                         min = 10, max = 10000, value = 1000),
              sliderInput("slider2", label= h4("La longuitud de las cadenas"),
-                         min = 0, max = 100, value = 10),
-             numericInput("pa", label = h4("Parámetros a:",5,min=)
+                         min = 0, max = 10, value = 3)
            ),
            mainPanel()
            )

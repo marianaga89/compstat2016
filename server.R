@@ -187,14 +187,52 @@ bondeaj <- eventReactive(input$bo,{
     data <- read.csv("dat_ec.csv")
     rat1 <- abs(max(data$PESO)-min(data$PESO))/abs(max(data$TALLA)-min(data$TALLA))
     if(input$variabley==2){
-      ggplot(data,aes(x=PESO,y=TALLA))+geom_point(colour="#B6659E",size=2,shape=1)+
+      ggplot(data,aes(x=PESO,y=TALLA))+geom_point(colour="#EEAAD9",size=2,shape=1)+
         theme_bw()+coord_fixed(rat1)
     }
     else{
-      ggplot(data,aes(x=TALLA,y=PESO))+geom_point(colour="#B6659E",size=2,shape=1)+
+      ggplot(data,aes(x=TALLA,y=PESO))+geom_point(colour="#EEAAD9",size=2,shape=1)+
         theme_bw()+coord_fixed(rat1)
     }
     
   })
+  output$graf_dens <- renderPlot({
+     g1 <- ggplot(data.frame(x = rnorm(100,input$med_a,input$sd_a)), aes(x)) + 
+      stat_function(fun = dnorm, 
+                    colour = "#B6659E",
+                    size = 1,
+                    args = list(mean = input$med_a, sd = input$sd_a))+
+      theme_bw()+
+       ggtitle("Inicial\nParámetro a\nNormal") + 
+       ylab("Densidad") + 
+       xlab("Soporte") 
+     g2 <- ggplot(data.frame(x = rnorm(100,input$med_b,input$sd_b)), aes(x)) + 
+       stat_function(fun = dnorm, 
+                     colour = "#B6659E",
+                     size = 1,
+                     args = list(mean = input$med_b, sd = input$sd_b))+
+       theme_bw()+
+       ggtitle("Inicial\nParámetro b\nNormal") + 
+       ylab("Densidad") + 
+       xlab("Soporte") 
+     g3 <- ggplot(data.frame(x = runif(100,input$min_sd,input$max_sd)), aes(x)) + 
+       stat_function(fun = runif, 
+                     colour = "#B6659E",
+                     size = 1,
+                     args = list(min = input$min_sd, max= input$max_sd))+
+       theme_bw()+
+       ggtitle("Inicial\nParámetro s\nUniforme") + 
+       ylab("Densidad") + 
+       xlab("Soporte") 
+     gridExtra::grid.arrange(g1, g2, g3, nrow = 1)
+  })
 }
 ########################tarea 5############################
+
+
+
+
+
+
+
+
