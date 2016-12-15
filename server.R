@@ -116,56 +116,85 @@ bondeaj <- eventReactive(input$bo,{
     bondeaj()
   })
 ##############################tarea2##########################################
-  fun1 <- eventReactive(input$go2,{
+  fun1 <- reactive({
     texto <- paste("aux <- ",input$expresion1)
     eval(parse(text = texto))
     aux
   })
 
-  funMC <- reactive({
-    N <- seq(input$numon1, 10*input$numon1, by=input$numon1)
+  funMC <- eventReactive(input$go2,{
+    N <- c(10,100,1000,10000,100000)
     lapply(N, function(nsim){
       X <- runif(nsim,input$a,input$b)
+      xtr <- seq(input$a,input$b, by=((input$b-input$a)/nsim))
+      fi <- sapply(xtr, fun1())
       PHIX <- (input$b-input$a)*sapply(X, fun1())
       estim <- round(mean(PHIX),4)
+      estimtr <- ((input$b-input$a)/(2*nsim))*sum(fi[-1]+fi[-(nsim+1)])
       var <- var(PHIX)
       quant1 <- qnorm((input$alpha1)/2, lower.tail=FALSE)
       quant2 <- qnorm((input$alpha2)/2, lower.tail=FALSE)
-      limsup1 <- round(estim + sqrt(var/input$numon1)*quant1,4)
-      liminf1 <- round(estim - sqrt(var/input$numon1)*quant1,4)
-      limsup2 <- round(estim + sqrt(var/input$numon1)*quant2,4)
-      liminf2 <- round(estim - sqrt(var/input$numon1)*quant2,4)
-      data.frame(N=nsim,Estimado=round(estim,2),
-                 LI1=round(liminf1,2),
-                 LS1=round(limsup1,2),
-                 LI2=round(liminf2,2),
-                 LS2=round(limsup2,2))
+      limsup1 <- round(estim + sqrt(var/nsim)*quant1,4)
+      liminf1 <- round(estim - sqrt(var/nsim)*quant1,4)
+      limsup2 <- round(estim + sqrt(var/nsim)*quant2,4)
+      liminf2 <- round(estim - sqrt(var/nsim)*quant2,4)
+      data.frame(N=nsim,
+                 real = round(integrate(fun1(),input$a,input$b)$value,2),
+                 Estim_MC=round(estim,2),
+                 Err_MC = round(integrate(fun1(),input$a,input$b)$value,2)-round(estim,2),
+                 Estim_TR=round(estimtr,2),
+                 Err_TR=round(integrate(fun1(),input$a,input$b)$value,2)-round(estimtr,2),
+                 MC.LI1=round(liminf1,2),
+                 MC.LS1=round(limsup1,2),
+                 MC.LI2=round(liminf2,2),
+                 MC.LS2=round(limsup2,2))
     })
   })
-  output$Result <- renderPrint({ 
+  output$Result <- renderPrint({
     ldply(funMC())
   })
   output$graf <- renderPlot({
-    x <- sort(runif(input$numon1,input$a,input$b))
+    x <- sort(runif(1000,input$a,input$b))
     y <- sapply(x, fun1())
     rat1 <- abs(max(x)-min(x))/abs(max(y)-min(y))
-    ggplot(data.frame(x,y),aes(x,y))+geom_line(colour="#990000",size=2)+
-      geom_area(fill="#FA5A57")+theme_bw()+coord_fixed(ratio = rat1)
+    ggplot(data.frame(x,y),aes(x,y))+geom_line(colour="#B6659E",size=2)+
+      geom_area(fill="#EEAAD9")+theme_bw()+coord_fixed(ratio = rat1)
     })
   output$grafint <- renderPlot({
     data <- data.frame(ldply(funMC()))
     integral <- integrate(fun1(),input$a,input$b)$value
-    ggplot(data, aes(x=N)) +
-      geom_ribbon(aes(ymin=LI1, ymax=LS1), fill="#FA5A57", alpha=.4) + 
-      geom_ribbon(aes(ymin=LI2, ymax=LS2), fill="#FA5A57", alpha=.4) +
-      geom_line(aes(y=Estimado), colour="#990000") + theme_bw()+
+    ggplot(data, aes(x=log(N))) +
+      geom_ribbon(aes(ymin=MC.LI1, ymax=MC.LS1), fill="#EEAAD9", alpha=.4) + 
+      geom_ribbon(aes(ymin=MC.LI2, ymax=MC.LS2), fill="#EEAAD9", alpha=.4) +
+      geom_line(aes(y=Estim_MC), colour="#B6659E") + theme_bw()+
       geom_hline(aes(yintercept=integral) , colour="red", linetype="dotted", size=1)
   })
-########################tarea 3 ############################
-  output$contents <- renderTable({
-    inFile <- input$file1
-    if (is.null(inFile))
-      return(NULL)
-    read.csv(inFile$datapath,header = TRUE)
+  output$grafcomp <- renderPlot({
+    res <- data.frame(ldply(funMC()))
+    ggplot(res, aes(x=log(N))) + 
+      geom_line(aes(y=Err_TR, colour="Trapezoidal")) + 
+      geom_line(aes(y=Err_MC, colour="MonteCarlo")) + 
+      theme_bw()+
+      scale_colour_manual("Error", values=c("#1BF9DC", "#B6659E"))
+  })
+  
+########################tarea 4############################
+  output$table <- DT::renderDataTable(DT::datatable({
+    data <- read.csv("dat_ec.csv")
+    data
+  }))
+  output$graft4 <- renderPlot({
+    data <- read.csv("dat_ec.csv")
+    rat1 <- abs(max(data$PESO)-min(data$PESO))/abs(max(data$TALLA)-min(data$TALLA))
+    if(input$variabley==2){
+      ggplot(data,aes(x=PESO,y=TALLA))+geom_point(colour="#B6659E",size=2,shape=1)+
+        theme_bw()+coord_fixed(rat1)
+    }
+    else{
+      ggplot(data,aes(x=TALLA,y=PESO))+geom_point(colour="#B6659E",size=2,shape=1)+
+        theme_bw()+coord_fixed(rat1)
+    }
+    
   })
 }
+########################tarea 5############################

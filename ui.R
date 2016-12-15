@@ -35,41 +35,51 @@ navbarPage("Tareas",
                     titlePanel("Monte Carlo"),
                     sidebarLayout(
                       sidebarPanel(
-                        numericInput("numon1","Número de simulaciones",1000),
-                        textInput("expresion1","Función a integrar","function(x) 2*x"),
+                        textInput("expresion1","Función a integrar","function(x) sin(x)"),
                         numericInput("a","Límite inferior de la integral",0),
-                        numericInput("b","Límite superior de la integral",1),
-                        actionButton("go2", "Generar"),
-                        numericInput("alpha1","Nivel de confianza de los intervalos",.5),
-                        numericInput("alpha2","Nivel de confianza de los intervalos",.5),
-                        verbatimTextOutput("Result")
+                        numericInput("b","Límite superior de la integral",6.28),
+                        sliderInput("alpha1","Nivel de confianza de los intervalos",min=0,max=1,.5),
+                        sliderInput("alpha2","Nivel de confianza de los intervalos",min=0,max=1,.05),
+                        actionButton("go2", "Generar")
                       ),
                       mainPanel(
                         plotOutput("graf"),
-                        plotOutput("grafint")
+                        plotOutput("grafint"),
+                        plotOutput("grafcomp"),
+                        verbatimTextOutput("Result")
                       )
                     )
            ),
-           tabPanel("Tarea_3",
-                       titlePanel("Cadenas de Markov"),
+           tabPanel("Tarea_4",
+                       titlePanel("Metropolis-Hasting (set up inicial)"),
                        sidebarLayout(
                          sidebarPanel(
-                           fileInput('file1', 'Matriz de Transición',
-                                     accept = c(
-                                       'text/csv',
-                                       'text/comma-separated-values',
-                                       'text/tab-separated-values',
-                                       'text/plain',
-                                       '.csv',
-                                       '.tsv',
-                                       '.dat',
-                                       'xlsx'
-                                     )
-                         )
+                           selectInput("variablex", "Variable independiente X:",
+                                       c("Peso" = "1",
+                                         "Talla" = "2")),
+                           selectInput("variabley", "Variable dependiente Y:",
+                                       c("Talla" = "2",
+                                         "Peso" = "1"))
                        ),
                        mainPanel(
-                         tableOutput('contents')
+                         fluidRow(
+                           DT::dataTableOutput("table"),
+                           plotOutput("graft4")
+                         )
                        )
                        )
-)
+),
+tabPanel("Tarea_5",
+         titlePanel("Metropolis-Hasting (EL MCMC)"),
+         sidebarLayout(
+           sidebarPanel(
+             sliderInput("slider1", label = h4("Número de cadenas que se quiere simular"),
+                         min = 0, max = 100, value = 50),
+             sliderInput("slider2", label= h4("La longuitud de las cadenas"),
+                         min = 0, max = 100, value = 10),
+             numericInput("pa", label = h4("Parámetros a:",5,min=)
+           ),
+           mainPanel()
+           )
+         )
 )
